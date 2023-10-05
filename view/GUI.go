@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -60,14 +61,26 @@ func main() {
 	citySelectContainerHorizontal := container.NewHBox(citySelect, tempUnits, darkMode)
 	citySelectContainer := container.NewVBox(citySelectContainerHorizontal)
 
-	// weather image (placeholder for now)
-	weatherImage := canvas.NewImageFromFile("icons/day/113.png")
-	weatherImage.FillMode = canvas.ImageFillOriginal
+	// today weather display (big temperature reading next to weather icon)
+	todayTemperatureReading := canvas.NewText("     "+"20"+"°", color.White)
+	todayTemperatureReading.TextSize = 100
+	todayTemperatureReading.Alignment = fyne.TextAlignCenter
+
+	// today weather icon, align to the rigth of the temperature reading
+	todayWeatherImage := canvas.NewImageFromFile("icons/day/113.png")
+	todayWeatherImage.FillMode = canvas.ImageFillContain
+	//todayWeatherImage.Resize(fyne.NewSize(100, 100))
+
+	// container containing temperature reading and weather icon
+	todayWeatherContainer := container.NewHBox(todayTemperatureReading, todayWeatherImage)
+	todayWeatherContainer.Resize(fyne.NewSize(400, 100))
 
 	// Assemble the GUI
 	mainGUI := citySelectContainer
 	mainGUI.Add(cityInputContainer)
-	mainGUI.Add(weatherImage)
+	//add 100px padding
+	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel(" "))))
+	mainGUI.Add(todayWeatherContainer)
 	myWindow.SetContent(mainGUI)
 	myWindow.ShowAndRun()
 }
