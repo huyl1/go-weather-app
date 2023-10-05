@@ -21,22 +21,14 @@ func main() {
 	citySelect := widget.NewSelect(cities, func(s string) {
 		fmt.Println("Selected", s)
 	})
-
-	// add textbox for user to type the name of the city, and resize it
-	addCityTextbox := widget.NewEntry()
-	addCityTextbox.SetPlaceHolder("Enter City Name")
-
 	citySelect.SetSelected("London") // Set default city
+
 	// Add new city button
 	addCityButton := widget.NewButton("Add City", func() {
-		newCity := addCityTextbox.Text
-		cities = append(cities, newCity)
-		citySelect.Options = cities
-		citySelect.Refresh()
-		addCityTextbox.SetText("Enter City Name")
+		fmt.Println("Add City Button Pressed")
 	})
 
-	citySelectContainerHorizontal := container.NewHBox(citySelect, addCityTextbox, addCityButton)
+	citySelectContainerHorizontal := container.NewHBox(citySelect, addCityButton)
 	citySelectContainer := container.NewVBox(citySelectContainerHorizontal)
 
 	// Assemble the GUI
