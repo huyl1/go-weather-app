@@ -30,6 +30,7 @@ func main() {
 	newCityInput.SetPlaceHolder("Enter City Name to Add")
 
 	addCityButton := widget.NewButton("Add City", func() {
+		// TODO: send city name to lookup API, add to text file or sthing
 		cities = append(cities, newCityInput.Text)
 		citySelect.Options = cities
 		citySelect.Refresh()
@@ -62,25 +63,31 @@ func main() {
 	citySelectContainer := container.NewVBox(citySelectContainerHorizontal)
 
 	// today weather display (big temperature reading next to weather icon)
-	todayTemperatureReading := canvas.NewText("     "+"20"+"°", color.White)
+	todayTemperatureReading := canvas.NewText(" "+"20"+"°", color.White)
 	todayTemperatureReading.TextSize = 100
 	todayTemperatureReading.Alignment = fyne.TextAlignCenter
 
-	// today weather icon, align to the rigth of the temperature reading
-	todayWeatherImage := canvas.NewImageFromFile("icons/day/113.png")
-	todayWeatherImage.FillMode = canvas.ImageFillContain
-	//todayWeatherImage.Resize(fyne.NewSize(100, 100))
+	// weather forecast for the next three days
+	forecast1 := canvas.NewText(" "+"20"+"° ", color.White)
+	forecast1.TextSize = 50
+	forecast1.Alignment = fyne.TextAlignCenter
+	forecast2 := canvas.NewText(" "+"20"+"° ", color.White)
+	forecast2.TextSize = 50
+	forecast2.Alignment = fyne.TextAlignCenter
+	forecast3 := canvas.NewText(" "+"20"+"° ", color.White)
+	forecast3.TextSize = 50
+	forecast3.Alignment = fyne.TextAlignCenter
 
-	// container containing temperature reading and weather icon
-	todayWeatherContainer := container.NewHBox(todayTemperatureReading, todayWeatherImage)
-	todayWeatherContainer.Resize(fyne.NewSize(400, 100))
+	forecastContainer := container.NewHBox(widget.NewLabel("       "), forecast1, forecast2, forecast3)
 
 	// Assemble the GUI
 	mainGUI := citySelectContainer
 	mainGUI.Add(cityInputContainer)
 	//add 100px padding
-	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel(" "))))
-	mainGUI.Add(todayWeatherContainer)
+	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Today"))))
+	mainGUI.Add(todayTemperatureReading)
+	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Next 3 Days"))))
+	mainGUI.Add(forecastContainer)
 	myWindow.SetContent(mainGUI)
 	myWindow.ShowAndRun()
 }
