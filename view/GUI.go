@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math/rand"
+	model "model"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -14,6 +15,16 @@ import (
 )
 
 func main() {
+	//model that holds the current state of the program
+	currentState := model.CurrentState{
+		CityNames:      []string{},
+		WeatherDataMap: make(map[string]model.WeatherData),
+	}
+	//adding Tucson by default
+	currentState.CityNames = append(currentState.CityNames, "Tucson")
+	tucsonWeather := model.GetCityData("Tucson")
+	currentState.WeatherDataMap["Tucson"] = tucsonWeather
+
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Weather App")
 	myWindow.Resize(fyne.NewSize(400, 600))
