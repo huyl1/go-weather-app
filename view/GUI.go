@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -30,8 +31,11 @@ func main() {
 
 	// settings
 	textColor := color.White
+	bgcolorLight := color.RGBA{96, 99, 71, 0x80}
+	bgColorDark := color.RGBA{96, 99, 71, 0x9A}
 	metric := false
-	darkMode := false
+	darkMode := true
+	myApp.Settings().SetTheme(theme.DarkTheme())
 	fmt.Printf("units: %v\n", metric)
 	fmt.Printf("dark mode: %v\n", darkMode)
 
@@ -44,6 +48,7 @@ func main() {
 	// dropdown menu for cities
 	citySelect := widget.NewSelect(cities, func(s string) {
 		fmt.Println("Selected", s)
+		//write code that updates the GUI when the city changes here
 	})
 	citySelect.SetSelected("London") // Set default city
 
@@ -72,18 +77,6 @@ func main() {
 			metric = false
 		}
 	})
-
-	// toggle button for dark mode
-	darkModeToggle := widget.NewCheck("Dark Mode", func(b bool) {
-		if b {
-			darkMode = true
-		} else {
-			darkMode = false
-		}
-	})
-
-	citySelectContainerHorizontal := container.NewHBox(citySelect, tempUnitsToggle, darkModeToggle)
-	citySelectContainer := container.NewVBox(citySelectContainerHorizontal)
 
 	// today weather display (big temperature reading next to weather icon)
 	todayTemperatureReading := canvas.NewText(" "+"20"+"°", textColor)
@@ -115,12 +108,43 @@ func main() {
 	percip := widget.NewLabel("Percipitation: 0%")
 	uv := widget.NewLabel("UV Index: 0")
 
-	weatherDetailsContainer1 := container.NewHBox(windspeed, winddir, humidity)
-	weatherDetailsContainer2 := container.NewHBox(pressure, percip, uv)
+	weatherDetailsContainerInner := container.NewGridWithRows(3, windspeed, winddir, humidity, pressure, percip, uv)
+	weatherDetailsBg := canvas.NewRectangle(bgColorDark)
+
+	weatherDetailsContainerOuter := container.NewStack(weatherDetailsBg, weatherDetailsContainerInner)
 
 	// last updated time
 	lastUpdated := widget.NewLabel("Last Updated: " + time.Now().Format("15:04:05"))
 	lastUpdated.Alignment = fyne.TextAlignCenter
+
+	// toggle button for dark mode
+	darkModeToggle := widget.NewCheck("Dark Mode", func(b bool) {
+		if b {
+			darkMode = true
+			myApp.Settings().SetTheme(theme.DarkTheme())
+			textColor = color.White
+			todayTemperatureReading.Color = textColor
+			todayTemperatureDescription.Color = textColor
+			forecast1.Color = textColor
+			forecast2.Color = textColor
+			forecast3.Color = textColor
+			weatherDetailsBg.FillColor = bgColorDark
+		} else {
+			darkMode = false
+			myApp.Settings().SetTheme(theme.LightTheme())
+			textColor = color.Black
+			todayTemperatureReading.Color = textColor
+			todayTemperatureDescription.Color = textColor
+			forecast1.Color = textColor
+			forecast2.Color = textColor
+			forecast3.Color = textColor
+			weatherDetailsBg.FillColor = bgcolorLight
+		}
+	})
+	darkModeToggle.SetChecked(true)
+
+	citySelectContainerHorizontal := container.NewHBox(citySelect, tempUnitsToggle, darkModeToggle)
+	citySelectContainer := container.NewVBox(citySelectContainerHorizontal)
 
 	// Assemble the GUI
 	mainGUI := citySelectContainer
@@ -132,15 +156,15 @@ func main() {
 	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Next 3 Days"))))
 	mainGUI.Add(forecastContainer)
 	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Today's Details"))))
-	mainGUI.Add(weatherDetailsContainer1)
-	mainGUI.Add(weatherDetailsContainer2)
+	mainGUI.Add(weatherDetailsContainerOuter)
+	//mainGUI.Add(weatherDetailsContainer2)
 	mainGUI.Add(lastUpdated)
 	myWindow.SetContent(mainGUI)
 
-	// go routine to update the weather every 3 seconds (will be 60s in final version)
+	// go routine to update the weather every 30 seconds (will be 60s in final version)
 	go func() {
 		for {
-			time.Sleep(3 * time.Second)
+			time.Sleep(30 * time.Second)
 			updateToday(todayTemperatureReading, todayTemperatureDescription, metric, currentCity)
 			updateForecasts(forecast1, forecast2, forecast3, metric, currentCity)
 			updateTodayDetails(windspeed, winddir, humidity, pressure, percip, uv, metric, currentCity)
