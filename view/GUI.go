@@ -110,7 +110,6 @@ func main() {
 	})
 
 	// today weather display (big temperature reading next to weather icon)
-	// using the Imperial units as default --NOEL
 	var tempToday float64
 	if metric {
 		tempToday = currentCityData.TempC0

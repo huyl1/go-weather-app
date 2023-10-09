@@ -11,36 +11,41 @@ import (
 	"strings"
 )
 
+// WeatherData represents weather-related data for a city.
 type WeatherData struct {
-	GoodResponse bool
-	CityName     string
-	TempC0       float64 // in Celsius
-	TempF0       float64
-	Humidity     float64 // percentage
-	WindMPH      float64
-	WindKPH      float64
-	PrecipInches float64
-	PrecipMm     float64
-	Pressure     float64
-	Uv           float64
-	WindDir      string
-	Condition    string
-	TempC1       float64
-	TempF1       float64 //aaaaaaaa
-	TempC2       float64
-	TempF2       float64
-	TempC3       float64
-	TempF3       float64
-	Icon0        string
-	Icon1        string
-	Icon2        string
-	Icon3        string
+	GoodResponse bool    // Indicates whether the response from the weather API was successful.
+	CityName     string  // The name of the city.
+	TempC0       float64 // Current temperature in Celsius.
+	TempF0       float64 // Current temperature in Fahrenheit.
+	Humidity     float64 // Humidity percentage.
+	WindMPH      float64 // Wind speed in miles per hour.
+	WindKPH      float64 // Wind speed in kilometers per hour.
+	PrecipInches float64 // Precipitation in inches.
+	PrecipMm     float64 // Precipitation in millimeters.
+	Pressure     float64 // Atmospheric pressure in hPa (hectopascals).
+	Uv           float64 // UV index.
+	WindDir      string  // Wind direction.
+	Condition    string  // Weather condition description.
+	TempC1       float64 // Temperature forecast for Day 1 in Celsius.
+	TempF1       float64 // Temperature forecast for Day 1 in Fahrenheit.
+	TempC2       float64 // Temperature forecast for Day 2 in Celsius.
+	TempF2       float64 // Temperature forecast for Day 2 in Fahrenheit.
+	TempC3       float64 // Temperature forecast for Day 3 in Celsius.
+	TempF3       float64 // Temperature forecast for Day 3 in Fahrenheit.
+	Icon0        string  // Weather icon URL for the current weather.
+	Icon1        string  // Weather icon URL for Day 1 forecast.
+	Icon2        string  // Weather icon URL for Day 2 forecast.
+	Icon3        string  // Weather icon URL for Day 3 forecast.
 }
+
+//represents the current state of the program during application run
 type CurrentState struct {
 	CityNames      []string               // List of city names as strings
 	WeatherDataMap map[string]WeatherData // Map of city names to WeatherData structs
 }
 
+// getCityData retrieves weather data for a specified city.
+// It takes the cityName as a parameter and returns a WeatherData struct.
 func getCityData(cityName string) WeatherData {
 	var apiKey = "740d078b218647dd88412232230710"
 	// Define the API endpoint URL
