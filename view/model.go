@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -213,4 +215,65 @@ func getImageString(path string) string {
 	parts := strings.Split(path, "/")
 	lastPart := strings.Join(parts[len(parts)-2:], "/")
 	return lastPart
+}
+
+func loadCityNamesFromFile(currentState *CurrentState) error {
+	// Open the file
+	filePath := "cityNames.txt"
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Create a scanner to read the file line by line
+	scanner := bufio.NewScanner(file)
+
+	// Read each line and add it to the CityNames slice
+	for scanner.Scan() {
+		cityName := scanner.Text()
+		currentState.CityNames = append(currentState.CityNames, cityName)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func writeCityNamesToFile(currentState CurrentState) error {
+	filePath := "cityNames.txt"
+	// Open the file for writing
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Create a writer to write to the file
+	writer := bufio.NewWriter(file)
+
+	// Write each city name to the file except for the last one
+	for i, cityName := range currentState.CityNames {
+		_, err := writer.WriteString(cityName)
+		if err != nil {
+			return err
+		}
+
+		// Add a newline character after all but the last city name
+		if i < len(currentState.CityNames)-1 {
+			_, err := writer.WriteString("\n")
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Flush any buffered data to the file
+	if err := writer.Flush(); err != nil {
+		return err
+	}
+
+	return nil
 }
