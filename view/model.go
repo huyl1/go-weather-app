@@ -21,6 +21,7 @@ type WeatherData struct {
 	WindKPH      float64
 	PrecipInches float64
 	PrecipMm     float64
+	Pressure     float64
 	Uv           float64
 	WindDir      string
 	Condition    string
@@ -40,23 +41,7 @@ type CurrentState struct {
 	WeatherDataMap map[string]WeatherData // Map of city names to WeatherData structs
 }
 
-// func main() {
-// 	dataChannel := make(chan WeatherData)
-
-// 	// Launch a Goroutine to fetch and process the data
-// 	go func() {
-// 		cityData := getCityData("Tucson")
-// 		dataChannel <- cityData // Send the data to the channel
-// 	}()
-
-// 	// Receive the data from the channel
-// 	cityData := <-dataChannel
-// 	// Print the data from the CityData struct
-// 	fmt.Println("GoodResponse:", cityData.GoodResponse)
-
-// }
-
-func GetCityData(cityName string) WeatherData {
+func getCityData(cityName string) WeatherData {
 	var apiKey = "740d078b218647dd88412232230710"
 	// Define the API endpoint URL
 
@@ -104,6 +89,7 @@ func GetCityData(cityName string) WeatherData {
 	uv := data["current"].(map[string]interface{})["uv"].(float64)
 	condition := data["current"].(map[string]interface{})["condition"].(map[string]interface{})["text"].(string)
 	icon0 := data["current"].(map[string]interface{})["condition"].(map[string]interface{})["icon"].(string)
+	pressure := data["current"].(map[string]interface{})["pressure_mb"].(float64)
 
 	collectedData.CityName = cityName
 	collectedData.TempC0 = tempC
@@ -117,6 +103,7 @@ func GetCityData(cityName string) WeatherData {
 	collectedData.Condition = condition
 	collectedData.WindDir = windDir
 	collectedData.Icon0 = getImageString(icon0)
+	collectedData.Pressure = pressure
 	collectedData.GoodResponse = true
 
 	dataChannel := make(chan WeatherData)
