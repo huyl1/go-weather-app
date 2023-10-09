@@ -1,3 +1,6 @@
+// This application displays the weather for a list of cities.
+// The weather data is fetched from the WeatherAPI and updated every 30 seconds.
+
 package main
 
 import (
