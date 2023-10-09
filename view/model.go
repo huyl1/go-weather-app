@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type WeatherData struct {
@@ -27,6 +28,10 @@ type WeatherData struct {
 	TempF2       float64
 	TempC3       float64
 	TempF3       float64
+	Icon0        string
+	Icon1        string
+	Icon2        string
+	Icon3        string
 }
 type CurrentState struct {
 	CityNames      []string               // List of city names as strings
@@ -46,23 +51,6 @@ type CurrentState struct {
 // 	cityData := <-dataChannel
 // 	// Print the data from the CityData struct
 // 	fmt.Println("GoodResponse:", cityData.GoodResponse)
-// 	fmt.Println("CityName:", cityData.CityName)
-// 	fmt.Println("TempC (Celsius):", cityData.TempC0)
-// 	fmt.Println("TempF (Fahrenheit):", cityData.TempF0)
-// 	fmt.Println("Humidity (%):", cityData.Humidity)
-// 	fmt.Println("WindMPH:", cityData.WindMPH)
-// 	fmt.Println("WindKPH:", cityData.WindKPH)
-// 	fmt.Println("PrecipInches:", cityData.PrecipInches)
-// 	fmt.Println("PrecipMm:", cityData.PrecipMm)
-// 	fmt.Println("Uv:", cityData.Uv)
-// 	fmt.Println("WindDir:", cityData.WindDir)
-// 	fmt.Println("Condition:", cityData.Condition)
-// 	fmt.Println("TempC1 (Celsius):", cityData.TempC1)
-// 	fmt.Println("TempF1 (Fahrenheit):", cityData.TempF1)
-// 	fmt.Println("TempC2 (Celsius):", cityData.TempC2)
-// 	fmt.Println("TempF2 (Fahrenheit):", cityData.TempF2)
-// 	fmt.Println("TempC3 (Celsius):", cityData.TempC3)
-// 	fmt.Println("TempF3 (Fahrenheit):", cityData.TempF3)
 
 // }
 
@@ -113,6 +101,7 @@ func GetCityData(cityName string) WeatherData {
 	precipMm := data["current"].(map[string]interface{})["precip_mm"].(float64)
 	uv := data["current"].(map[string]interface{})["uv"].(float64)
 	condition := data["current"].(map[string]interface{})["condition"].(map[string]interface{})["text"].(string)
+	icon0 := data["current"].(map[string]interface{})["condition"].(map[string]interface{})["icon"].(string)
 
 	collectedData.CityName = cityName
 	collectedData.TempC0 = tempC
@@ -125,6 +114,7 @@ func GetCityData(cityName string) WeatherData {
 	collectedData.Uv = uv
 	collectedData.Condition = condition
 	collectedData.WindDir = windDir
+	collectedData.Icon0 = getImageString(icon0)
 	collectedData.GoodResponse = true
 
 	dataChannel := make(chan WeatherData)
@@ -186,6 +176,10 @@ func getWeatherForecast(apiKey, encoded string, collectedData *WeatherData) {
 		avgTempC := dayData["avgtemp_c"].(float64)
 		avgTempF := dayData["avgtemp_f"].(float64)
 		collectedData.SetTemperature((i + 1), avgTempC, avgTempF)
+
+		iconText := dayData["condition"].(map[string]interface{})["icon"].(string)
+		iconText = getImageString(iconText)
+		collectedData.SetIcon((i + 1), iconText)
 	}
 
 	collectedData.GoodResponse = true
@@ -203,4 +197,20 @@ func (w *WeatherData) SetTemperature(day int, tempC float64, tempF float64) {
 		w.TempC3 = tempC
 		w.TempF3 = tempF
 	}
+}
+func (w *WeatherData) SetIcon(day int, icon string) {
+	switch day {
+	case 1:
+		w.Icon1 = icon
+	case 2:
+		w.Icon2 = icon
+	case 3:
+		w.Icon3 = icon
+	}
+}
+
+func getImageString(path string) string {
+	parts := strings.Split(path, "/")
+	lastPart := strings.Join(parts[len(parts)-2:], "/")
+	return lastPart
 }

@@ -21,9 +21,6 @@ func main() {
 		WeatherDataMap: make(map[string]WeatherData),
 	}
 	//adding Tucson by default
-	currentState.CityNames = append(currentState.CityNames, "Tucson")
-	tucsonWeather := GetCityData("Tucson")
-	currentState.WeatherDataMap["Tucson"] = tucsonWeather
 
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Weather App")
