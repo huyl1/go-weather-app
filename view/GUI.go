@@ -13,6 +13,26 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+type TodayTemp struct {
+	today *canvas.Text
+	desc  *canvas.Text
+}
+
+type Forecast struct {
+	forecast1 *canvas.Text
+	forecast2 *canvas.Text
+	forecast3 *canvas.Text
+}
+
+type TodayDetails struct {
+	windspeed *widget.Label
+	winddir   *widget.Label
+	humidity  *widget.Label
+	pressure  *widget.Label
+	precip    *widget.Label
+	uv        *widget.Label
+}
+
 func main() {
 	//write update functions that update the state vars
 	//put in the correct field values at the relevant slots in the GUI
@@ -66,48 +86,6 @@ func main() {
 
 	// String array for cities (for now)
 	cities := currentState.CityNames
-
-	// dropdown menu for cities
-	citySelect := widget.NewSelect(cities, func(s string) {
-		fmt.Println("Selected", s)
-		//write code that updates the GUI when the city changes here
-	})
-	citySelect.SetSelected(currentState.CityNames[0]) // Set default city
-
-	// new city input
-	newCityInput := widget.NewEntry()
-	newCityInput.SetPlaceHolder("Enter City Name to Add")
-
-	addCityButton := widget.NewButton("Add City", func() {
-		// -- NOEL
-		currentCity := newCityInput.Text
-		currentCityData := getCityData(currentCity)
-		if currentCityData.GoodResponse {
-			currentState.CityNames = append(currentState.CityNames, currentCity)
-			currentState.WeatherDataMap[currentCity] = currentCityData
-		} else {
-			//TODO: bring up alert saying invalid city name or API may be down
-			fmt.Print("Invalid city name provided or the weather API may be down.")
-		}
-		cities = currentState.CityNames
-
-		citySelect.Options = cities
-		citySelect.Refresh()
-		//clear the input box
-		newCityInput.SetText("Enter City Name to Add")
-	})
-
-	cityInputContainer := container.NewBorder(nil, nil, nil, addCityButton, newCityInput)
-	cityInputContainer.Resize(fyne.NewSize(400, 50))
-
-	// toggle button for temperature units
-	tempUnitsToggle := widget.NewCheck("Metric", func(b bool) {
-		if b {
-			metric = true
-		} else {
-			metric = false
-		}
-	})
 
 	// today weather display (big temperature reading next to weather icon)
 	// using the Imperial units as default --NOEL
@@ -190,6 +168,55 @@ func main() {
 	lastUpdated := widget.NewLabel("Last Updated: " + time.Now().Format("15:04:05"))
 	lastUpdated.Alignment = fyne.TextAlignCenter
 
+	// dropdown menu for cities
+	citySelect := widget.NewSelect(cities, func(s string) {
+		fmt.Println("Selected", s)
+		currentCity = s
+		currentCityData = currentState.WeatherDataMap[currentCity]
+		updateToday(todayTemperatureReading, todayTemperatureDescription, metric, currentCity, currentCityData)
+		updateForecasts(forecast1, forecast2, forecast3, metric, currentCity, currentCityData)
+		updateTodayDetails(windspeed, winddir, humidity, pressure, precip, uv, metric, currentCity, currentCityData)
+	})
+	citySelect.SetSelected(currentState.CityNames[0]) // Set default city
+
+	// new city input
+	newCityInput := widget.NewEntry()
+	newCityInput.SetPlaceHolder("Enter City Name to Add")
+
+	addCityButton := widget.NewButton("Add City", func() {
+		// -- NOEL
+		currentCity := newCityInput.Text
+		currentCityData := getCityData(currentCity)
+		if currentCityData.GoodResponse {
+			currentState.CityNames = append(currentState.CityNames, currentCity)
+			currentState.WeatherDataMap[currentCity] = currentCityData
+		} else {
+			//TODO: bring up alert saying invalid city name or API may be down
+			fmt.Print("Invalid city name provided or the weather API may be down.")
+		}
+		cities = currentState.CityNames
+		citySelect.Options = cities
+		citySelect.SetSelected(currentCity)
+		citySelect.Refresh()
+		//clear the input box
+		newCityInput.SetText("Enter City Name to Add")
+	})
+
+	cityInputContainer := container.NewBorder(nil, nil, nil, addCityButton, newCityInput)
+	cityInputContainer.Resize(fyne.NewSize(400, 50))
+
+	// toggle button for temperature units
+	tempUnitsToggle := widget.NewCheck("Metric", func(b bool) {
+		if b {
+			metric = true
+		} else {
+			metric = false
+		}
+		updateToday(todayTemperatureReading, todayTemperatureDescription, metric, currentCity, currentCityData)
+		updateForecasts(forecast1, forecast2, forecast3, metric, currentCity, currentCityData)
+		updateTodayDetails(windspeed, winddir, humidity, pressure, precip, uv, metric, currentCity, currentCityData)
+	})
+
 	// toggle button for dark mode
 	darkModeToggle := widget.NewCheck("Dark Mode", func(b bool) {
 		if b {
@@ -223,12 +250,12 @@ func main() {
 	mainGUI := citySelectContainer
 	mainGUI.Add(cityInputContainer)
 	//add 100px padding
-	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Today"))))
+	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Today's Average"))))
 	mainGUI.Add(todayTemperatureDescription)
 	mainGUI.Add(todayTemperatureReading)
-	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Next 3 Days"))))
+	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Next 3 Days' Average"))))
 	mainGUI.Add(forecastContainer)
-	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Today's Details"))))
+	mainGUI.Add(container.NewVBox(container.NewVBox(widget.NewLabel("Real Time Weather Details"))))
 	mainGUI.Add(weatherDetailsContainerOuter)
 	//mainGUI.Add(weatherDetailsContainer2)
 	mainGUI.Add(lastUpdated)
@@ -269,7 +296,8 @@ func updateToday(today *canvas.Text, description *canvas.Text, metric bool, curr
 	description.Refresh()
 }
 
-func updateTodayDetails(windspeed *widget.Label, winddir *widget.Label, humidity *widget.Label, pressure *widget.Label, precip *widget.Label, uv *widget.Label, metric bool, currentCity string, currentCityData WeatherData) {
+func updateTodayDetails(windspeed *widget.Label, winddir *widget.Label, humidity *widget.Label, pressure *widget.Label,
+	precip *widget.Label, uv *widget.Label, metric bool, currentCity string, currentCityData WeatherData) {
 	// make random number between 20 and 30 (replace this with API call)
 	fmt.Print("Updating weather details for " + currentCity + "\n")
 	fmt.Print("metric: " + fmt.Sprint(metric) + "\n")
@@ -306,7 +334,8 @@ func updateTodayDetails(windspeed *widget.Label, winddir *widget.Label, humidity
 	uv.Refresh()
 }
 
-func updateForecasts(forecast1 *canvas.Text, forecast2 *canvas.Text, forecast3 *canvas.Text, metric bool, currentCity string, currentCityData WeatherData) {
+func updateForecasts(forecast1 *canvas.Text, forecast2 *canvas.Text, forecast3 *canvas.Text, metric bool,
+	currentCity string, currentCityData WeatherData) {
 	fmt.Print("Updating weather for " + currentCity + "\n")
 	fmt.Print("metric: " + fmt.Sprint(metric) + "\n")
 	var tempDay1 float64
