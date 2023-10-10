@@ -16,20 +16,20 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-/* This struct stores the graphic elements displaying the current weather */
+//This struct stores the graphic elements displaying the current weather
 type TodayWeather struct {
 	today       *canvas.Text
 	description *canvas.Text
 }
 
-/* This struct stores the graphic elements displaying the weather forecast */
+// This struct stores the graphic elements displaying the weather forecast
 type Forecast struct {
 	forecast1 *canvas.Text
 	forecast2 *canvas.Text
 	forecast3 *canvas.Text
 }
 
-/* This struct stores the graphic elements displaying the weather details */
+// This struct stores the graphic elements displaying the weather details
 type TodayDetails struct {
 	windspeed *widget.Label
 	winddir   *widget.Label
@@ -68,6 +68,7 @@ func main() {
 		currentState.WeatherDataMap[cityData.CityName] = cityData
 	}
 
+	//GUI initailization
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Weather App")
 	myWindow.Resize(fyne.NewSize(400, 600))
@@ -84,8 +85,7 @@ func main() {
 	currentCityData := currentState.WeatherDataMap[currentCity]
 	cities := currentState.CityNames
 
-	// today weather display
-	// using the Imperial units as default --NOEL
+	// today weather display, assigning values
 	var tempToday float64
 	if metric {
 		tempToday = currentCityData.TempC0
@@ -102,7 +102,7 @@ func main() {
 	todayTemperatureDescription.TextSize = 20
 	todayWeather := TodayWeather{todayTemperatureReading, todayTemperatureDescription}
 
-	// weather forecast for the next three days
+	// weather forecast for the next three days, assigning values
 	var tempDay1 float64
 	var tempDay2 float64
 	var tempDay3 float64
@@ -147,6 +147,7 @@ func main() {
 		precipStr = fmt.Sprintf("%.0fin", precipVal)
 	}
 
+	//displaying the relevant data
 	windspeed := widget.NewLabel("Windspeed: " + windSpeedStr)
 	winddir := widget.NewLabel("Wind Direction: " + currentCityData.WindDir)
 	humidityStr := fmt.Sprintf("%.0f%%", currentCityData.Humidity)
@@ -273,10 +274,11 @@ func main() {
 
 }
 
-/* This function updates the today's temperature and description with the current city's data */
+// This function updates the today's temperature and description with the current city's data
 func updateToday(todayWeather TodayWeather, metric bool, currentCity string, currentCityData WeatherData) {
 	var tempToday float64
 	today := todayWeather.today
+	//assigning values
 	description := todayWeather.description
 	if metric {
 		tempToday = currentCityData.TempC0
@@ -285,13 +287,12 @@ func updateToday(todayWeather TodayWeather, metric bool, currentCity string, cur
 	}
 	tempTodayStr := fmt.Sprintf("%.0f", tempToday)
 	today.Text = " " + tempTodayStr + "°"
-	// set description to random string (replace this with API call)
 	description.Text = currentCityData.Condition
 	today.Refresh()
 	description.Refresh()
 }
 
-/* This function updates the today's details with the current city's data */
+//his function updates the today's details with the current city's data
 func updateTodayDetails(todayDetails TodayDetails, metric bool, currentCity string, currentCityData WeatherData) {
 	windspeed := todayDetails.windspeed
 	winddir := todayDetails.winddir
@@ -299,7 +300,7 @@ func updateTodayDetails(todayDetails TodayDetails, metric bool, currentCity stri
 	pressure := todayDetails.pressure
 	precip := todayDetails.precip
 	uv := todayDetails.uv
-
+	//updating and assigning values
 	var windSpeedVal float64
 	var windSpeedStr string
 	var precipVal float64
@@ -315,10 +316,10 @@ func updateTodayDetails(todayDetails TodayDetails, metric bool, currentCity stri
 		precipVal = currentCityData.PrecipInches
 		precipStr = fmt.Sprintf("%.0fin", precipVal)
 	}
+	//building required strings
 	humidityStr := fmt.Sprintf("%.0f%%", currentCityData.Humidity)
 	pressureStr := fmt.Sprintf("%.0fhPa", currentCityData.Pressure)
 	uvStr := fmt.Sprintf("%.0f", currentCityData.Uv)
-
 	windspeed.Text = "Windspeed: " + windSpeedStr
 	winddir.Text = "Wind Direction: " + currentCityData.WindDir
 	humidity.Text = "Humidity: " + humidityStr
@@ -333,7 +334,7 @@ func updateTodayDetails(todayDetails TodayDetails, metric bool, currentCity stri
 	uv.Refresh()
 }
 
-/* This function updates the forecast with the current city's data */
+//This function updates the forecast with the current city's data
 func updateForecasts(forecast Forecast, metric bool, currentCity string, currentCityData WeatherData) {
 	forecast1 := forecast.forecast1
 	forecast2 := forecast.forecast2
@@ -350,6 +351,7 @@ func updateForecasts(forecast Forecast, metric bool, currentCity string, current
 		tempDay2 = currentCityData.TempF2
 		tempDay3 = currentCityData.TempF3
 	}
+	//building required strings
 	tempDay1Str := fmt.Sprintf("%.0f", tempDay1)
 	tempDay2Str := fmt.Sprintf("%.0f", tempDay2)
 	tempDay3Str := fmt.Sprintf("%.0f", tempDay3)
