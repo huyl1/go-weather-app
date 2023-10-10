@@ -199,6 +199,8 @@ func main() {
 		//clear the input box
 		newCityInput.SetPlaceHolder("Enter City Name to Add")
 		newCityInput.SetText("")
+		//save to file
+		writeCityNamesToFile(currentState)
 	})
 	cityInputContainer := container.NewBorder(nil, nil, nil, addCityButton, newCityInput)
 	cityInputContainer.Resize(fyne.NewSize(400, 50))
@@ -271,7 +273,6 @@ func main() {
 	}()
 
 	myWindow.ShowAndRun()
-
 }
 
 // This function updates the today's temperature and description with the current city's data
