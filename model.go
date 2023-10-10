@@ -1,3 +1,8 @@
+// This file contains structs and function that make up the state/model of a system
+// that displays the weather for a list of cities in an application.
+// The weather data is fetched from the WeatherAPI (https://www.weatherapi.com/) using
+// packages like net/http and net/irl and other auxillary packages to help complete tasks.
+
 package main
 
 import (
@@ -83,6 +88,7 @@ func getCityData(cityName string) WeatherData {
 		return collectedData
 	}
 
+	//getting the values from the map returned by the api call
 	tempC := data["current"].(map[string]interface{})["temp_c"].(float64)
 	tempF := data["current"].(map[string]interface{})["temp_f"].(float64)
 	humidity := data["current"].(map[string]interface{})["humidity"].(float64)
@@ -96,6 +102,7 @@ func getCityData(cityName string) WeatherData {
 	icon0 := data["current"].(map[string]interface{})["condition"].(map[string]interface{})["icon"].(string)
 	pressure := data["current"].(map[string]interface{})["pressure_mb"].(float64)
 
+	//assigning values to struct
 	collectedData.CityName = cityName
 	collectedData.TempC0 = tempC
 	collectedData.TempF0 = tempF
@@ -126,6 +133,7 @@ func getCityData(cityName string) WeatherData {
 
 // Function to fetch weather forecast for the next three days
 func getWeatherForecast(apiKey, encoded string, collectedData *WeatherData) {
+	//initialize vars
 	apiUrl := "http://api.weatherapi.com/v1/forecast.json?key=" + apiKey + "&q=" + encoded + "&days=3"
 	collectedData.GoodResponse = false
 
@@ -160,6 +168,7 @@ func getWeatherForecast(apiKey, encoded string, collectedData *WeatherData) {
 		fmt.Println("No forecast data available.")
 	}
 
+	//collect the required data and set the required fields
 	for i := 0; i < 3; i++ {
 		dayData, ok := forecastData["forecastday"].([]interface{})[i].(map[string]interface{})["day"].(map[string]interface{})
 		if !ok {
@@ -179,6 +188,7 @@ func getWeatherForecast(apiKey, encoded string, collectedData *WeatherData) {
 	collectedData.GoodResponse = true
 }
 
+//helper funciton used to set the attribute fields of the WeatherData object
 func (w *WeatherData) SetTemperature(day int, tempC float64, tempF float64) {
 	switch day {
 	case 1:
@@ -192,6 +202,8 @@ func (w *WeatherData) SetTemperature(day int, tempC float64, tempF float64) {
 		w.TempF3 = tempF
 	}
 }
+
+//helper funciton used to set the attribute fields of the WeatherData object
 func (w *WeatherData) SetIcon(day int, icon string) {
 	switch day {
 	case 1:
@@ -203,12 +215,14 @@ func (w *WeatherData) SetIcon(day int, icon string) {
 	}
 }
 
+//helper function used to help collect the relevant string from the api call
 func getImageString(path string) string {
 	parts := strings.Split(path, "/")
 	lastPart := strings.Join(parts[len(parts)-2:], "/")
 	return lastPart
 }
 
+//function used to load data on application startup
 func loadCityNamesFromFile(currentState *CurrentState) error {
 	// Open the file
 	filePath := "cityNames.txt"
@@ -226,7 +240,7 @@ func loadCityNamesFromFile(currentState *CurrentState) error {
 		cityName := scanner.Text()
 		currentState.CityNames = append(currentState.CityNames, cityName)
 	}
-
+	//return if errored out
 	if err := scanner.Err(); err != nil {
 		return err
 	}
@@ -234,6 +248,7 @@ func loadCityNamesFromFile(currentState *CurrentState) error {
 	return nil
 }
 
+//function used to save data on application exit
 func writeCityNamesToFile(currentState CurrentState) error {
 	filePath := "cityNames.txt"
 	// Open the file for writing

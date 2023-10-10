@@ -40,10 +40,6 @@ type TodayDetails struct {
 }
 
 func main() {
-	//write update functions that update the state vars
-	//put in the correct field values at the relevant slots in the GUI
-	//on exit, call write function
-
 	//model that holds the current state of the program -- NOEL
 	currentState := CurrentState{
 		CityNames:      []string{},
