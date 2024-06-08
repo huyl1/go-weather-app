@@ -1,8 +1,9 @@
 # go-weather-app
 README of the repo at https://github.com/huyyyle/go-weather-app.git
 
-This is a weather APP. DEMO:
-https://github.com/huyl1/go-weather-app/assets/57906351/9ca4fe94-2646-46ed-92f5-4d70681d42ad
+This is a weather APP.
+
+![Recording_2023-10-09_110531](https://github.com/huyl1/go-weather-app/assets/57906351/b0f41040-1e87-4d64-90ff-e73e89f51d77)
 
 Steps to run this program:
 
